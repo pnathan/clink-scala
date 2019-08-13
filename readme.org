@@ -1,0 +1,5 @@
+clink
+
+a long and winding journey into read only database systems, restarted in scala.
+
+(C) AGPL3, Paul Nathan
