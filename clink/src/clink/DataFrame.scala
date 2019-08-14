@@ -4,10 +4,14 @@ trait ref {
 }
 
 
+trait ColumnRef
+case class Name(val s: String) extends ColumnRef
+case class Index(val i: Int) extends ColumnRef
+
 @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments", "org.wartremover.warts.Var"))
 case class Header(canonical_name: String,
   canonical_index: Int,
-  var associated_names: Seq[String] = Seq[String]()) {
+  var associated_names: Seq[String] = Seq[String]()) extends ColumnRef {
 
   def add_associated_names(names: Seq[String]): Unit =
     this.associated_names = this.associated_names ++ names
@@ -29,7 +33,9 @@ object Header {
 
 // An element is one of:
 // String, Integer, Float
-trait Element
+trait Element {
+  def to_s: String
+}
 
 object Element {
   def parse(s: String): Option[Element] = {
@@ -52,15 +58,26 @@ object Elemental {
 }
 
 // Value classes
-case class DfString(val s: String) extends Element
-case class DfInteger(val i: Int) extends Element
-case class DfDouble(val i: Double) extends Element
+case class DfString(val s: String) extends Element {
+  def to_s: String = s
+}
+case class DfInteger(val i: Int) extends Element {
+  def to_s: String = s"$i"
+}
+case class DfDouble(val i: Double) extends Element {
+  def to_s: String = s"$i"
+}
 
 // TODO: maybe add implicit conversions from string to df string, etc.
 
 case class DataFrame(
   headers: Seq[Header],
   data: Array[Array[Element]]) {
+
+  def to_s: String = {
+    (headers.map(_.canonical_name).mkString(", ") ++ "\n---\n" ++
+      data.map { row => row.map(_.to_s).mkString(", ") }.mkString("\n"))
+  }
 
   @SuppressWarnings(Array("org.wartremover.warts.Var"))
   private var internal_data: Array[Array[Element]] = data
